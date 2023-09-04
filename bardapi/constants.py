@@ -3,7 +3,7 @@ from colorama import Fore
 ALLOWED_LANGUAGES = {"en", "ko", "ja", "english", "korean", "japanese"}
 DEFAULT_LANGUAGE = "en"
 SEPARATOR_LINE = "=" * 36
-USER_PROMPT = Fore.BLUE + "You: " + Fore.RESET
+USER_PROMPT = f"{Fore.BLUE}You: {Fore.RESET}"
 
 SESSION_HEADERS = {
     "Host": "bard.google.com",

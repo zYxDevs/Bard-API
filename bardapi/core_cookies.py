@@ -67,15 +67,14 @@ class BardCookies(Bard):
         Raises:
             Exception: If the token is not provided and can't be extracted from the browser.
         """
-        if token_from_browser:
-            extracted_cookie_dict = extract_bard_cookie(cookies=True)
-            if not extracted_cookie_dict:
-                raise Exception("Failed to extract cookie from browsers.")
-            return extracted_cookie_dict
-        else:
+        if not token_from_browser:
             raise Exception(
                 "Bard API Key must be provided as token argument or extracted from browser."
             )
+        if extracted_cookie_dict := extract_bard_cookie(cookies=True):
+            return extracted_cookie_dict
+        else:
+            raise Exception("Failed to extract cookie from browsers.")
 
     def _get_session(self, session: Optional[requests.Session]) -> requests.Session:
         """
@@ -88,15 +87,14 @@ class BardCookies(Bard):
             requests.Session: The Session object.
         """
 
-        if session is None:
-            new_session = requests.Session()
-            new_session.headers = SESSION_HEADERS
-
-            for k, v in self.cookie_dict.items():
-                new_session.cookies.set(k, v)
-            return new_session
-        else:
+        if session is not None:
             return session
+        new_session = requests.Session()
+        new_session.headers = SESSION_HEADERS
+
+        for k, v in self.cookie_dict.items():
+            new_session.cookies.set(k, v)
+        return new_session
 
     def _get_snim0e(self) -> str:
         """
@@ -114,12 +112,12 @@ class BardCookies(Bard):
             raise Exception(
                 f"Response status code is not 200. Response Status is {resp.status_code}"
             )
-        snim0e = re.search(r"SNlM0e\":\"(.*?)\"", resp.text)
-        if not snim0e:
+        if snim0e := re.search(r"SNlM0e\":\"(.*?)\"", resp.text):
+            return snim0e.group(1)
+        else:
             raise Exception(
                 "SNlM0e value not found in response. Check __Secure-1PSID value."
             )
-        return snim0e.group(1)
 
     def get_answer(self, input_text: str) -> dict:
         """
@@ -331,15 +329,14 @@ class BardAsyncCookies(BardAsync):
         Raises:
             Exception: If the token is not provided and can't be extracted from the browser.
         """
-        if token_from_browser:
-            extracted_cookie_dict = extract_bard_cookie(cookies=True)
-            if not extracted_cookie_dict:
-                raise Exception("Failed to extract cookie from browsers.")
-            return extracted_cookie_dict
-        else:
+        if not token_from_browser:
             raise Exception(
                 "Bard API Key must be provided as token argument or extracted from browser."
             )
+        if extracted_cookie_dict := extract_bard_cookie(cookies=True):
+            return extracted_cookie_dict
+        else:
+            raise Exception("Failed to extract cookie from browsers.")
 
     async def _get_snim0e(self) -> str:
         """
@@ -359,12 +356,12 @@ class BardAsyncCookies(BardAsync):
             raise Exception(
                 f"Response status code is not 200. Response Status is {resp.status_code}"
             )
-        snim0e = re.search(r"SNlM0e\":\"(.*?)\"", resp.text)
-        if not snim0e:
+        if snim0e := re.search(r"SNlM0e\":\"(.*?)\"", resp.text):
+            return snim0e.group(1)
+        else:
             raise Exception(
                 "SNlM0e value not found in response. Check __Secure-1PSID value."
             )
-        return snim0e.group(1)
 
     async def get_answer(self, input_text: str) -> dict:
         """

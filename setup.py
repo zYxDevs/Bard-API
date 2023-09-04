@@ -10,15 +10,13 @@ def get_version():
     with open(filename) as f:
         match = re.search(r"""^__version__ = ['"]([^'"]*)['"]""", f.read(), re.M)
     if not match:
-        raise RuntimeError("{} doesn't contain __version__".format(filename))
-    version = match.groups()[0]
-    return version
+        raise RuntimeError(f"{filename} doesn't contain __version__")
+    return match.groups()[0]
 
 
 def get_long_description():
     with open("README.md", encoding="UTF-8") as f:
-        long_description = f.read()
-        return long_description
+        return f.read()
 
 
 version = get_version()
