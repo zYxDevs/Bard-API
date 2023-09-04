@@ -161,11 +161,7 @@ class ChatBard(Bard):
         Returns:
             bool: True if the user input is valid, False otherwise.
         """
-        if not user_input:
-            return False
-        if len(user_input) > 1000:
-            return False
-        return True
+        return False if not user_input else len(user_input) <= 1000
 
     def _display_response(self, response: dict) -> None:
         """

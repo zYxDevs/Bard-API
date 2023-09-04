@@ -206,12 +206,12 @@ class BardAsync:
             raise Exception(
                 f"Response code not 200. Response Status is {resp.status_code}"
             )
-        snim0e = search(r"SNlM0e\":\"(.*?)\"", resp.text)
-        if not snim0e:
+        if snim0e := search(r"SNlM0e\":\"(.*?)\"", resp.text):
+            return snim0e.group(1)
+        else:
             raise Exception(
                 "SNlM0e value not found in response. Check __Secure-1PSID value."
             )
-        return snim0e.group(1)
 
     def _extract_links(self, data: list) -> list:
         """

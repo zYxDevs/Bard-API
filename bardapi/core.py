@@ -76,10 +76,10 @@ class Bard:
         elif os.getenv("_BARD_API_KEY"):
             return os.getenv("_BARD_API_KEY")
         elif token_from_browser:
-            extracted_cookie_dict = extract_bard_cookie(cookies=False)
-            if not extracted_cookie_dict:
+            if extracted_cookie_dict := extract_bard_cookie(cookies=False):
+                return extracted_cookie_dict["__Secure-1PSID"]
+            else:
                 raise Exception("Failed to extract cookie from browsers.")
-            return extracted_cookie_dict["__Secure-1PSID"]
         else:
             raise Exception(
                 "Bard API Key must be provided as token argument or extracted from browser."
@@ -95,14 +95,13 @@ class Bard:
         Returns:
             requests.Session: The Session object.
         """
-        if session is None:
-            new_session = requests.Session()
-            new_session.headers = SESSION_HEADERS
-            new_session.cookies.set("__Secure-1PSID", self.token)
-            new_session.proxies = self.proxies
-            return new_session
-        else:
+        if session is not None:
             return session
+        new_session = requests.Session()
+        new_session.headers = SESSION_HEADERS
+        new_session.cookies.set("__Secure-1PSID", self.token)
+        new_session.proxies = self.proxies
+        return new_session
 
     def _get_snim0e(self) -> str:
         """
@@ -124,12 +123,12 @@ class Bard:
             raise Exception(
                 f"Response status code is not 200. Response Status is {resp.status_code}"
             )
-        snim0e = re.search(r"SNlM0e\":\"(.*?)\"", resp.text)
-        if not snim0e:
+        if snim0e := re.search(r"SNlM0e\":\"(.*?)\"", resp.text):
+            return snim0e.group(1)
+        else:
             raise Exception(
                 "SNlM0e value not found. Double-check __Secure-1PSID value or pass it as token='xxxxx'."
             )
-        return snim0e.group(1)
 
     def get_answer(self, input_text: str) -> dict:
         """
@@ -178,11 +177,7 @@ class Bard:
         ):
             translator_to_eng = GoogleTranslator(source="auto", target="en")
             input_text = translator_to_eng.translate(input_text)
-        elif (
-            self.language is not None
-            and self.language not in ALLOWED_LANGUAGES
-            and self.google_translator_api_key is not None
-        ):
+        elif self.language is not None and self.language not in ALLOWED_LANGUAGES:
             input_text = google_official_translator.translate(
                 input_text, target_language="en"
             )
@@ -244,12 +239,7 @@ class Bard:
                 for x in parsed_answer[4]
             ]
 
-        # Official google cloud translation API
-        elif (
-            self.language is not None
-            and self.language not in ALLOWED_LANGUAGES
-            and self.google_translator_api_key is not None
-        ):
+        elif self.language is not None and self.language not in ALLOWED_LANGUAGES:
             parsed_answer[4] = [
                 [
                     x[0],
@@ -483,10 +473,8 @@ class Bard:
             translator_to_eng = GoogleTranslator(source="auto", target="en")
             transl_text = translator_to_eng.translate(input_text)
         elif (
-            (self.language is not None or lang is not None)
-            and self.language not in ALLOWED_LANGUAGES
-            and self.google_translator_api_key is not None
-        ):
+            self.language is not None or lang is not None
+        ) and self.language not in ALLOWED_LANGUAGES:
             transl_text = google_official_translator.translate(
                 input_text, target_language="en"
             )
@@ -561,19 +549,15 @@ class Bard:
                 translator = GoogleTranslator(source="en", target=us_lang)
                 translated_content = translator.translate(content)
 
-            elif (
-                self.language is not None and self.google_translator_api_key is not None
-            ):
+            elif self.language is not None:
                 translated_content = google_official_translator.translate(
                     content, target_language=self.language
                 )
-            elif lang is not None and self.google_translator_api_key is not None:
+            elif lang is not None:
                 translated_content = google_official_translator.translate(
                     content, target_language=lang
                 )
-            elif (
-                self.language is None and lang is None
-            ) and self.google_translator_api_key is not None:
+            else:
                 us_lang = detect(input_text)
                 translated_content = google_official_translator.translate(
                     content, target_language=us_lang
